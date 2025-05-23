@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ultimate Tic-Tac-Toe</title>
+    <!-- Note: This is a standard Tic-Tac-Toe game, not the complex "Ultimate Tic-Tac-Toe". -->
+    <title>Tic-Tac-Toe Challenge</title>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Orbitron&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -12,6 +13,8 @@
             --bg-color: #1a202c;
             --cell-bg: #2d3748;
             --highlight: #48bb78;
+            --text-color: #cbd5e0;
+            --border-color: #4a5568;
         }
 
         body {
@@ -22,13 +25,13 @@
             background: var(--bg-color);
             font-family: 'Orbitron', sans-serif;
             margin: 0;
-            color: white;
+            color: var(--text-color);
         }
 
         .container {
             text-align: center;
             padding: 20px;
-            position: relative;
+            position: relative; /* For difficulty buttons positioning */
         }
 
         h1 {
@@ -45,7 +48,8 @@
             grid-template-columns: repeat(3, 1fr);
             gap: 10px;
             margin: 20px auto;
-            max-width: 500px;
+            max-width: 500px; /* Max width of the board itself */
+            width: clamp(280px, 90vw, 500px); /* Responsive width */
             background: rgba(255, 255, 255, 0.05);
             padding: 20px;
             border-radius: 15px;
@@ -55,23 +59,30 @@
         .cell {
             aspect-ratio: 1;
             background: var(--cell-bg);
-            border: 3px solid #4a5568;
+            border: 3px solid var(--border-color);
             border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 4rem;
+            font-size: clamp(3rem, 15vw, 4rem); /* Responsive font size */
             cursor: pointer;
             transition: all 0.3s ease;
             position: relative;
             overflow: hidden;
+            color: var(--text-color); /* Default color for empty cells if needed */
         }
 
-        .cell:hover {
+        .cell:hover, .cell:focus {
             background: #4a5568;
             transform: scale(1.05);
             box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+            outline: none; /* Custom focus styling preferred */
         }
+        .cell:focus-visible { /* More specific focus for keyboard users */
+            outline: 2px solid var(--highlight);
+            outline-offset: 2px;
+        }
+
 
         .cell.x {
             color: var(--x-color);
@@ -84,12 +95,13 @@
         }
 
         .cell.winner {
-            background: var(--highlight);
+            background: var(--highlight) !important; /* Ensure winner style overrides others */
             border-color: var(--highlight);
+            color: var(--bg-color); /* Winner text color for contrast */
             animation: glow 1s infinite alternate;
         }
 
-        .cell::after {
+        .cell::after { /* Subtle hover/focus overlay */
             content: '';
             position: absolute;
             width: 100%;
@@ -97,28 +109,29 @@
             background: rgba(255, 255, 255, 0.1);
             opacity: 0;
             transition: opacity 0.3s;
+            pointer-events: none; /* Ensure it doesn't interfere with clicks */
         }
 
-        .cell:hover::after {
+        .cell:hover::after, .cell:focus::after {
             opacity: 1;
         }
 
         @keyframes glow {
             from { box-shadow: 0 0 10px var(--highlight); }
-            to { box-shadow: 0 0 20px var(--highlight); }
+            to { box-shadow: 0 0 25px var(--highlight), 0 0 10px var(--highlight); }
         }
 
         .controls {
             display: flex;
             gap: 15px;
             justify-content: center;
-            margin: 20px 0;
+            margin: 25px 0;
         }
 
         button {
             padding: 12px 24px;
             font-size: 1rem;
-            background: #4a5568;
+            background: var(--cell-bg); /* Consistent button bg */
             color: white;
             border: none;
             border-radius: 8px;
@@ -128,11 +141,17 @@
             letter-spacing: 1px;
         }
 
-        button:hover {
+        button:hover, button:focus {
             background: var(--highlight);
             transform: scale(1.05);
             box-shadow: 0 0 15px rgba(72, 187, 120, 0.3);
+            outline: none;
         }
+        button:focus-visible {
+            outline: 2px solid var(--text-color);
+            outline-offset: 2px;
+        }
+
 
         #scores {
             display: flex;
@@ -140,7 +159,7 @@
             gap: 30px;
             margin: 20px 0;
             font-size: 1.2rem;
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.07);
             padding: 15px;
             border-radius: 10px;
         }
@@ -150,18 +169,27 @@
             border-radius: 8px;
             background: var(--cell-bg);
             min-width: 100px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
+
+        .score.active-player {
+            transform: scale(1.08);
+            box-shadow: 0 0 15px var(--highlight);
+            border: 1px solid var(--highlight);
+        }
+
 
         #message {
             font-size: 1.3rem;
-            min-height: 2rem;
+            min-height: 2.6rem; /* To prevent layout shift */
             margin: 20px 0;
-            color: #cbd5e0;
+            color: var(--text-color);
             text-transform: uppercase;
             letter-spacing: 2px;
+            font-weight: bold;
         }
 
-        #difficulty {
+        #difficulty-selector { /* Changed ID for clarity */
             position: absolute;
             top: 20px;
             right: 20px;
@@ -172,29 +200,45 @@
         .difficulty-btn {
             padding: 8px 15px;
             font-size: 0.8rem;
-            background: #4a5568;
+            background: var(--border-color); /* Different base for non-active */
+        }
+        .difficulty-btn.active, .difficulty-btn:hover, .difficulty-btn:focus {
+            background: var(--highlight);
         }
 
+
+        @media (max-width: 600px) {
+            h1 { font-size: 1.7rem; }
+            #difficulty-selector {
+                position: static; /* Stack difficulty buttons on small screens */
+                margin-bottom: 15px;
+                justify-content: center;
+            }
+        }
         @media (max-width: 480px) {
             h1 { font-size: 1.5rem; }
-            .cell { font-size: 3rem; }
-            #scores { gap: 15px; }
+            .cell { font-size: clamp(2.5rem, 13vw, 3rem); }
+            #scores { gap: 15px; flex-direction: column; align-items: center;}
+            .score { min-width: 120px; }
+            button { padding: 10px 18px; font-size: 0.9rem;}
+            .difficulty-btn { font-size: 0.75rem; }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div id="difficulty">
-            <button class="difficulty-btn active" data-difficulty="easy">Easy</button>
-            <button class="difficulty-btn" data-difficulty="hard">Hard</button>
+    <main class="container">
+        <div id="difficulty-selector">
+            <button class="difficulty-btn active" data-difficulty="easy" aria-pressed="true">Easy</button>
+            <button class="difficulty-btn" data-difficulty="hard" aria-pressed="false">Hard</button>
         </div>
         
-        <h1>ULTIMATE TIC-TAC-TOE</h1>
+        <h1>TIC-TAC-TOE</h1> <!-- Changed title to reflect game type -->
         <div id="scores">
-            <div class="score">X: <span id="scoreX">0</span></div>
-            <div class="score">O: <span id="scoreO">0</span></div>
+            <div class="score" id="scoreDisplayX">X: <span id="scoreX">0</span></div>
+            <div class="score" id="scoreDisplayO">O: <span id="scoreO">0</span></div>
         </div>
         <div id="gameboard">
+            <!-- Cells will be dynamically given aria-labels -->
             <div class="cell" data-index="0"></div>
             <div class="cell" data-index="1"></div>
             <div class="cell" data-index="2"></div>
@@ -205,63 +249,94 @@
             <div class="cell" data-index="7"></div>
             <div class="cell" data-index="8"></div>
         </div>
-        <div id="message">Player X's turn</div>
+        <div id="message" aria-live="polite">Player X's turn</div>
         <div class="controls">
             <button id="reset">New Game</button>
-            <button id="toggleMode">VS Computer</button>
+            <button id="toggleMode" aria-pressed="false">VS Computer</button>
         </div>
-    </div>
+    </main>
 
     <script>
         const cells = document.querySelectorAll('.cell');
-        const scoreX = document.querySelector('#scoreX');
-        const scoreO = document.querySelector('#scoreO');
-        const message = document.querySelector('#message');
+        const scoreXEl = document.querySelector('#scoreX');
+        const scoreOEl = document.querySelector('#scoreO');
+        const scoreDisplayX = document.querySelector('#scoreDisplayX');
+        const scoreDisplayO = document.querySelector('#scoreDisplayO');
+        const messageEl = document.querySelector('#message');
         const resetButton = document.querySelector('#reset');
         const modeButton = document.querySelector('#toggleMode');
         const difficultyButtons = document.querySelectorAll('.difficulty-btn');
 
-        let currentPlayer = 'x';
+        const PLAYER_X = 'x';
+        const PLAYER_O = 'o';
+        let currentPlayer = PLAYER_X;
         let gameBoard = Array(9).fill('');
         let gameActive = true;
         let vsComputer = false;
-        let difficulty = 'easy';
+        let currentDifficulty = 'easy';
+
         const winCombos = [
             [0, 1, 2], [3, 4, 5], [6, 7, 8], // Rows
             [0, 3, 6], [1, 4, 7], [2, 5, 8], // Columns
-            [0, 4, 8], [2, 4, 6] // Diagonals
+            [0, 4, 8], [2, 4, 6]             // Diagonals
         ];
 
-        // Enhanced AI with basic strategy
         function computerMove() {
             if (!gameActive) return;
+            messageEl.textContent = "Computer is thinking...";
 
-            // Try to win first
-            let move = findWinningMove('o');
-            if (move !== -1) return makeMove(move);
+            // AI logic will be executed after a short delay
+            setTimeout(() => {
+                if (!gameActive) return; // Double check game state, in case reset happened
 
-            // Block player win
-            move = findWinningMove('x');
-            if (move !== -1) return makeMove(move);
+                // 1. Try to win
+                let move = findWinningMove(PLAYER_O);
+                if (move !== -1) {
+                    makeMove(move);
+                    return;
+                }
 
-            // Take center if available
-            if (gameBoard[4] === '') return makeMove(4);
+                // 2. Block player's win
+                move = findWinningMove(PLAYER_X);
+                if (move !== -1) {
+                    makeMove(move);
+                    return;
+                }
 
-            // Take random corner
-            const corners = [0, 2, 6, 8];
-            const availableCorners = corners.filter(i => gameBoard[i] === '');
-            if (availableCorners.length > 0 && difficulty === 'hard') {
-                return makeMove(availableCorners[Math.floor(Math.random() * availableCorners.length)]);
-            }
+                // 3. Take center if available
+                if (gameBoard[4] === '') {
+                    makeMove(4);
+                    return;
+                }
+                
+                // 4. Difficulty-specific strategy
+                if (currentDifficulty === 'hard') {
+                    // Try to take an available corner
+                    const corners = [0, 2, 6, 8];
+                    const availableCorners = corners.filter(i => gameBoard[i] === '');
+                    if (availableCorners.length > 0) {
+                        makeMove(availableCorners[Math.floor(Math.random() * availableCorners.length)]);
+                        return;
+                    }
+                    // Try to take an available side
+                    const sides = [1, 3, 5, 7];
+                    const availableSides = sides.filter(i => gameBoard[i] === '');
+                    if (availableSides.length > 0) {
+                        makeMove(availableSides[Math.floor(Math.random() * availableSides.length)]);
+                        return;
+                    }
+                }
 
-            // Random move
-            const emptyCells = gameBoard
-                .map((cell, index) => cell === '' ? index : null)
-                .filter(cell => cell !== null);
-            
-            if (emptyCells.length > 0) {
-                makeMove(emptyCells[Math.floor(Math.random() * emptyCells.length)]);
-            }
+                // 5. Fallback: Take any random available cell (for 'easy' or if 'hard' found no strategic spot)
+                const emptyCells = [];
+                gameBoard.forEach((cell, index) => {
+                    if (cell === '') emptyCells.push(index);
+                });
+                
+                if (emptyCells.length > 0) {
+                    makeMove(emptyCells[Math.floor(Math.random() * emptyCells.length)]);
+                }
+            }, 750); // Delay for "thinking" effect
         }
 
         function findWinningMove(player) {
@@ -271,7 +346,7 @@
                 if (gameBoard[a] === player && gameBoard[c] === player && gameBoard[b] === '') return b;
                 if (gameBoard[b] === player && gameBoard[c] === player && gameBoard[a] === '') return a;
             }
-            return -1;
+            return -1; // No winning move found
         }
 
         function checkWinner() {
@@ -279,34 +354,43 @@
                 const [a, b, c] = combo;
                 if (gameBoard[a] && gameBoard[a] === gameBoard[b] && gameBoard[a] === gameBoard[c]) {
                     combo.forEach(i => cells[i].classList.add('winner'));
-                    return gameBoard[a];
+                    return gameBoard[a]; // Return winner ('x' or 'o')
                 }
             }
-            return gameBoard.includes('') ? null : 'tie';
+            return gameBoard.includes('') ? null : 'tie'; // Return null if game ongoing, 'tie' if draw
         }
 
         function makeMove(index) {
             if (!gameActive || gameBoard[index] !== '') return;
 
             gameBoard[index] = currentPlayer;
-            cells[index].textContent = currentPlayer;
+            cells[index].textContent = currentPlayer.toUpperCase();
             cells[index].classList.add(currentPlayer);
+            cells[index].setAttribute('aria-label', `Cell ${index + 1}, ${currentPlayer.toUpperCase()}`);
+            cells[index].style.cursor = 'not-allowed';
+
 
             const winner = checkWinner();
             if (winner) {
                 gameActive = false;
                 if (winner === 'tie') {
-                    message.textContent = "It's a tie!";
+                    messageEl.textContent = "It's a tie!";
                 } else {
-                    message.textContent = `${winner.toUpperCase()} wins!`;
-                    winner === 'x' ? scoreX.textContent++ : scoreO.textContent++;
+                    messageEl.textContent = `${winner.toUpperCase()} wins!`;
+                    if (winner === PLAYER_X) {
+                        scoreXEl.textContent = parseInt(scoreXEl.textContent) + 1;
+                    } else {
+                        scoreOEl.textContent = parseInt(scoreOEl.textContent) + 1;
+                    }
                 }
+                updatePlayerHighlight(); // Clear highlight on game end
             } else {
-                currentPlayer = currentPlayer === 'x' ? 'o' : 'x';
-                message.textContent = `Player ${currentPlayer.toUpperCase()}'s turn`;
+                currentPlayer = currentPlayer === PLAYER_X ? PLAYER_O : PLAYER_X;
+                messageEl.textContent = `Player ${currentPlayer.toUpperCase()}'s turn`;
+                updatePlayerHighlight();
                 
-                if (vsComputer && currentPlayer === 'o') {
-                    setTimeout(computerMove, 500);
+                if (vsComputer && currentPlayer === PLAYER_O && gameActive) {
+                    computerMove();
                 }
             }
         }
@@ -314,24 +398,57 @@
         function resetGame() {
             gameBoard = Array(9).fill('');
             gameActive = true;
-            currentPlayer = 'x';
-            message.textContent = `Player X's turn`;
-            cells.forEach(cell => {
+            currentPlayer = PLAYER_X;
+            messageEl.textContent = `Player ${PLAYER_X.toUpperCase()}'s turn`;
+            cells.forEach((cell, index) => {
                 cell.textContent = '';
-                cell.className = 'cell';
+                cell.className = 'cell'; // Reset classes
+                cell.setAttribute('aria-label', `Cell ${index + 1}, empty`);
+                cell.style.cursor = 'pointer';
             });
+            updatePlayerHighlight();
+            if (vsComputer && currentPlayer === PLAYER_O) { // If computer is O and starts first after reset (rare, but handle)
+                computerMove();
+            }
         }
 
         function toggleMode() {
             vsComputer = !vsComputer;
             modeButton.textContent = vsComputer ? 'VS Human' : 'VS Computer';
+            modeButton.setAttribute('aria-pressed', vsComputer.toString());
+            // Reset scores when changing mode to be fair
+            scoreXEl.textContent = '0';
+            scoreOEl.textContent = '0';
             resetGame();
+        }
+
+        function updatePlayerHighlight() {
+            scoreDisplayX.classList.remove('active-player');
+            scoreDisplayO.classList.remove('active-player');
+            if (gameActive) {
+                if (currentPlayer === PLAYER_X) {
+                    scoreDisplayX.classList.add('active-player');
+                } else {
+                    scoreDisplayO.classList.add('active-player');
+                }
+            }
         }
 
         // Event Listeners
         cells.forEach((cell, index) => {
             cell.addEventListener('click', () => {
-                if (!vsComputer || (vsComputer && currentPlayer === 'x')) {
+                if (vsComputer && currentPlayer === PLAYER_O) {
+                    return; // Don't allow human to click for computer
+                }
+                makeMove(index);
+            });
+            // Add keyboard accessibility for cells
+            cell.setAttribute('role', 'button');
+            cell.setAttribute('tabindex', '0'); // Make cells focusable
+            cell.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault(); // Prevent page scroll on space
+                     if (vsComputer && currentPlayer === PLAYER_O) return;
                     makeMove(index);
                 }
             });
@@ -342,14 +459,22 @@
 
         difficultyButtons.forEach(btn => {
             btn.addEventListener('click', () => {
-                difficulty = btn.dataset.difficulty;
-                difficultyButtons.forEach(b => b.classList.remove('active'));
+                currentDifficulty = btn.dataset.difficulty;
+                difficultyButtons.forEach(b => {
+                    b.classList.remove('active');
+                    b.setAttribute('aria-pressed', 'false');
+                });
                 btn.classList.add('active');
+                btn.setAttribute('aria-pressed', 'true');
+                resetGame(); // Reset game when difficulty changes
             });
         });
 
         // Initialize game
         resetGame();
+         // Set initial aria-pressed for the default active difficulty button
+        document.querySelector('.difficulty-btn.active').setAttribute('aria-pressed', 'true');
+
     </script>
 </body>
 </html>
